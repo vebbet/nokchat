@@ -1,0 +1,11 @@
+{
+  "name": "Nok",
+  "description": "Nok - Tezkor va xavfsiz muloqot uchun zamonaviy chat ilovasi.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
