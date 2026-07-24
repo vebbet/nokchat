@@ -538,8 +538,12 @@ export default function AuthModal({
 
               <button
                 onClick={async () => {
-                  await onGoogleSignIn();
-                  onClose();
+                  try {
+                    await onGoogleSignIn();
+                    onClose();
+                  } catch (e) {
+                    // Handled in App.tsx
+                  }
                 }}
                 disabled={isLoggingIn}
                 className="w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white py-3 px-4 rounded-xl font-bold text-xs transition cursor-pointer shadow-md flex items-center justify-center gap-3 disabled:opacity-50"

@@ -298,6 +298,32 @@ export default function Sidebar({
         </div>
       </div>
 
+      {/* Mobile Screen Tab Toggle (Suhbatlar vs Xonalar) */}
+      <div className="flex sm:hidden border-b border-gray-200/80 bg-white px-3 py-2 gap-2 shrink-0">
+        <button
+          onClick={() => onTabChange('contacts')}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+            activeTab === 'contacts'
+              ? 'bg-[#d3e3fd] text-[#041e49] shadow-2xs'
+              : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200/60'
+          }`}
+        >
+          <MessageSquare size={15} />
+          <span>Suhbatlar</span>
+        </button>
+        <button
+          onClick={() => onTabChange('spaces')}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+            activeTab === 'spaces'
+              ? 'bg-[#d3e3fd] text-[#041e49] shadow-2xs'
+              : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200/60'
+          }`}
+        >
+          <Users size={15} />
+          <span>Xonalar</span>
+        </button>
+      </div>
+
       {/* Google Chat Connection Banner (Logged Out) */}
       {!user && (
         <div className="p-3.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-100 text-xs text-blue-900 flex flex-col gap-2 shrink-0 m-3 rounded-2xl shadow-xs">

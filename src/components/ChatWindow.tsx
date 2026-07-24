@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Contact, Message } from '../types';
-import { Smile, Send, Search, MoreVertical, ShieldCheck, CheckCheck, Check, Paperclip, Paintbrush, Users, LogOut, Trash2 } from 'lucide-react';
+import { Smile, Send, Search, MoreVertical, ShieldCheck, CheckCheck, Check, Paperclip, Paintbrush, Users, LogOut, Trash2, ArrowLeft } from 'lucide-react';
 import EmojiPicker from './EmojiPicker';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -11,6 +11,7 @@ interface ChatWindowProps {
   allContacts?: Contact[];
   onUpdateContact?: (updatedContact: Contact) => void;
   onDeleteContact?: (id: string) => void;
+  onBack?: () => void;
 }
 
 function getFriendlyDate(isoString: string): string {
@@ -47,6 +48,7 @@ export default function ChatWindow({
   allContacts = [],
   onUpdateContact,
   onDeleteContact,
+  onBack,
 }: ChatWindowProps) {
   const [inputText, setInputText] = useState('');
   const [showEmojis, setShowEmojis] = useState(false);
@@ -166,12 +168,21 @@ export default function ChatWindow({
   return (
     <div id="chat-window" className="flex-1 flex flex-col h-full relative overflow-hidden">
       {/* Chat Window Header */}
-      <header className="h-16 bg-white px-5 flex items-center justify-between border-b border-gray-200/60 shrink-0 z-20 shadow-2xs">
+      <header className="h-16 bg-white px-3 sm:px-5 flex items-center justify-between border-b border-gray-200/60 shrink-0 z-20 shadow-2xs">
         <div className="flex items-center min-w-0">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="mr-2.5 p-2 rounded-full hover:bg-gray-100 text-gray-600 md:hidden transition cursor-pointer active:scale-95"
+              title="Orqaga"
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
           <img
             src={contact.avatar}
             alt={contact.name}
-            className="rounded-full w-10 h-10 object-cover bg-gray-50 border border-gray-200/80 shadow-2xs"
+            className="rounded-full w-10 h-10 object-cover bg-gray-50 border border-gray-200/80 shadow-2xs shrink-0"
             referrerPolicy="no-referrer"
             onError={(e) => {
               const col = isSpace ? '1a73e8' : '0b57d0';

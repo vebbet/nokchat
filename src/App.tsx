@@ -532,7 +532,18 @@ export default function App() {
       }
     } catch (err: any) {
       console.error('Google login failed:', err);
-      alert(`Xavfsiz ulanishda xatolik yuz berdi: ${err.message || err}`);
+      if (err?.code === 'auth/unauthorized-domain' || (err?.message && err.message.includes('unauthorized-domain'))) {
+        alert(
+          `⚠️ Vercel domeningiz Firebase-da ruxsat berilmagan (auth/unauthorized-domain)!\n\n` +
+          `Buni tuzatish uchun 3 ta oddiy qadam:\n` +
+          `1. Firebase Console (https://console.firebase.google.com) ga kiring.\n` +
+          `2. Loyihangiz -> Authentication -> Settings -> "Authorized domains" bo'limiga o'ting.\n` +
+          `3. "Add domain" tugmasini bosib, Vercel domeningizni (masalan: sizning-app.vercel.app) qo'shing.\n\n` +
+          `💡 Yoki hozirning o'zida "Email orqali" tugmasini bosib ilovadan to'liq foydalanishingiz mumkin!`
+        );
+      } else {
+        alert(`Xavfsiz ulanishda xatolik yuz berdi: ${err.message || err}`);
+      }
     } finally {
       setIsLoggingIn(false);
     }
@@ -826,11 +837,11 @@ export default function App() {
   }
 
   return (
-    <div id="app-container" className="flex items-center justify-center h-screen w-screen bg-[#f0f4f9] p-0 md:p-3 select-none relative overflow-hidden">
+    <div id="app-container" className="flex items-center justify-center h-screen h-[100dvh] w-screen bg-[#f0f4f9] p-0 md:p-3 select-none relative overflow-hidden">
       {/* Google Workspace clean background pattern */}
       <div className="absolute inset-0 bg-gradient-to-tr from-[#eef2f9] via-[#f3f7fd] to-[#f8fafd] -z-20" />
 
-      <div className="w-full h-full md:h-[96vh] max-w-7xl bg-white shadow-2xl flex overflow-hidden md:rounded-2xl relative z-10 border border-gray-200/50">
+      <div className="w-full h-full h-[100dvh] md:h-[96vh] max-w-7xl bg-white shadow-2xl flex overflow-hidden md:rounded-2xl relative z-10 border border-gray-200/50">
         
         {/* ======================================================== */}
         {/* GOOGLE CHAT / WORKSPACE LEFT NAVIGATION RAIL */}
@@ -923,24 +934,26 @@ export default function App() {
         </div>
 
         {/* Sidebar Component */}
-        <Sidebar
-          user={user}
-          contacts={contacts}
-          activeContactId={activeContactId}
-          onSelectContact={setActiveContactId}
-          onOpenSettings={() => setShowSettings(true)}
-          onLogout={handleLogout}
-          onLoginClick={() => setShowAuthModal(true)}
-          loadingContacts={loadingContacts}
-          onAddCustomContact={handleAddCustomContact}
-          onAddCustomSpace={handleAddCustomSpace}
-          onDeleteContact={handleDeleteContact}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        <div className={`${activeContactId ? 'hidden md:flex' : 'flex'} w-full md:w-auto h-full shrink-0`}>
+          <Sidebar
+            user={user}
+            contacts={contacts}
+            activeContactId={activeContactId}
+            onSelectContact={setActiveContactId}
+            onOpenSettings={() => setShowSettings(true)}
+            onLogout={handleLogout}
+            onLoginClick={() => setShowAuthModal(true)}
+            loadingContacts={loadingContacts}
+            onAddCustomContact={handleAddCustomContact}
+            onAddCustomSpace={handleAddCustomSpace}
+            onDeleteContact={handleDeleteContact}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        </div>
 
         {/* Main Content Area: Chat Window */}
-        <div className="flex-1 flex flex-col h-full min-w-0 relative">
+        <div className={`flex-1 flex flex-col h-full min-w-0 relative ${activeContactId ? 'flex' : 'hidden md:flex'}`}>
           <ChatWindow
             contact={activeContact}
             messages={activeMessages}
@@ -948,6 +961,7 @@ export default function App() {
             allContacts={contacts}
             onUpdateContact={handleUpdateContact}
             onDeleteContact={handleDeleteContact}
+            onBack={() => setActiveContactId(null)}
           />
         </div>
 
