@@ -61,7 +61,7 @@ export default function Sidebar({
     setIsSearchingServer(true);
 
     fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
-      .then(res => res.json())
+      .then(res => (res.ok && res.headers.get('content-type')?.includes('application/json')) ? res.json() : { users: [] })
       .then(data => {
         const users: { name: string; email: string; avatar: string }[] = data.users || [];
 

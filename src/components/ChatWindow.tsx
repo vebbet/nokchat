@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Contact, Message } from '../types';
-import { Smile, Send, Search, MoreVertical, ShieldCheck, CheckCheck, Check, Paperclip, Paintbrush, Users, LogOut, Trash2, ArrowLeft } from 'lucide-react';
+import { Smile, Send, Search, MoreVertical, ShieldCheck, CheckCheck, Check, Paperclip, Paintbrush, Users, LogOut, Trash2, ArrowLeft, ArrowDown } from 'lucide-react';
 import EmojiPicker from './EmojiPicker';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -79,25 +79,49 @@ export default function ChatWindow({
     }
   }, [showGroupSettings, contact]);
   
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatBoxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Group messages by date
-  const groupedMessages: { date: string; list: Message[] }[] = [];
-  messages.forEach((msg) => {
-    const dateLabel = getFriendlyDate(msg.timestamp);
-    const existingGroup = groupedMessages.find((g) => g.date === dateLabel);
-    if (existingGroup) {
-      existingGroup.list.push(msg);
-    } else {
-      groupedMessages.push({ date: dateLabel, list: [msg] });
+  const scrollToBottom = (smooth = true) => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({
+        behavior: smooth ? 'smooth' : 'auto',
+        block: 'end',
+      });
     }
-  });
+  };
 
-  // Scroll to bottom on load or new messages
+  const handleChatScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const distanceToBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+    setShowScrollToBottom(distanceToBottom > 120);
+  };
+
+  // Scroll to bottom on load, messages update, or contact change
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, contact?.isTyping]);
+    scrollToBottom(false);
+    const timer = setTimeout(() => scrollToBottom(true), 150);
+    return () => clearTimeout(timer);
+  }, [messages, contact?.id, contact?.isTyping]);
+
+  // Handle visualViewport resize on mobile (when soft keyboard opens)
+  useEffect(() => {
+    const handleViewportChange = () => {
+      scrollToBottom(false);
+    };
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      window.visualViewport.addEventListener('scroll', handleViewportChange);
+    }
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportChange);
+        window.visualViewport.removeEventListener('scroll', handleViewportChange);
+      }
+    };
+  }, []);
 
   const handleSend = () => {
     if (!inputText.trim()) return;
@@ -271,7 +295,9 @@ export default function ChatWindow({
           {/* Message Area */}
           <div
             id="chatBox"
-            className={`flex-1 p-4 md:p-6 overflow-y-auto flex flex-col gap-4 relative transition-all duration-300 ${selectedWallpaper.class}`}
+            ref={chatBoxRef}
+            onScroll={handleChatScroll}
+            className={`flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto flex flex-col gap-3 sm:gap-4 relative transition-all duration-300 ${selectedWallpaper.class}`}
           >
             {groupedMessages.map((group, groupIdx) => (
               <div key={groupIdx} className="flex flex-col gap-3 z-10">
@@ -293,7 +319,7 @@ export default function ChatWindow({
                         initial={{ scale: 0.95, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.12 }}
-                        className={`p-3 rounded-2xl shadow-2xs max-w-[80%] md:max-w-md relative pb-1.5 ${
+                        className={`p-3 rounded-2xl shadow-2xs max-w-[85%] sm:max-w-[80%] md:max-w-md relative pb-1.5 ${
                           isUser
                             ? 'bg-[#c2e7ff] text-[#041e49] rounded-tr-sm'
                             : isDarkWallpaper
@@ -350,17 +376,33 @@ export default function ChatWindow({
               </div>
             )}
 
-            <div ref={chatEndRef} />
+            <div ref={chatEndRef} className="h-2" />
           </div>
+
+          {/* Floating Scroll-to-Bottom Button */}
+          <AnimatePresence>
+            {showScrollToBottom && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                onClick={() => scrollToBottom(true)}
+                className="absolute bottom-18 right-4 sm:right-6 z-30 p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition cursor-pointer active:scale-95 border border-white/20"
+                title="Eng pastga tushish"
+              >
+                <ArrowDown size={18} />
+              </motion.button>
+            )}
+          </AnimatePresence>
 
           {/* Chat Window Footer */}
           {contact?.hasLeft ? (
-            <div className="h-16 bg-red-50 text-red-600 flex items-center justify-center px-4 border-t border-gray-200 shrink-0 font-medium text-xs md:text-sm shadow-inner gap-2 relative z-20">
+            <div className="h-14 sm:h-16 bg-red-50 text-red-600 flex items-center justify-center px-4 border-t border-gray-200 shrink-0 font-medium text-xs md:text-sm shadow-inner gap-2 relative z-20">
               <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping shrink-0"></span>
               Siz ushbu guruhni tark etgansiz. Xabar yuborib bo'lmaydi.
             </div>
           ) : (
-            <footer className="h-16 bg-white flex items-center px-5 space-x-3 border-t border-gray-200/50 shrink-0 relative z-20">
+            <footer className="bg-white flex items-center px-3 sm:px-5 py-2.5 border-t border-gray-200/50 shrink-0 relative z-20 space-x-2 sm:space-x-3">
               <button
                 id="btn-emoji"
                 onClick={() => {
@@ -394,8 +436,13 @@ export default function ChatWindow({
                 placeholder={isSpace ? "Xonaga xabar yuborish..." : "Xabar yozing..."}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
+                onFocus={() => {
+                  setShowEmojis(false);
+                  setTimeout(() => scrollToBottom(false), 100);
+                  setTimeout(() => scrollToBottom(true), 350);
+                }}
                 onKeyDown={handleKeyPress}
-                className="flex-1 bg-[#f1f3f4] px-5 py-2.5 rounded-full border-transparent focus:border-transparent outline-none placeholder-gray-500 text-xs md:text-sm text-gray-800 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all duration-200"
+                className="flex-1 bg-[#f1f3f4] px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border-transparent focus:border-transparent outline-none placeholder-gray-500 text-xs md:text-sm text-gray-800 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all duration-200"
               />
 
               <button

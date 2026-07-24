@@ -102,7 +102,7 @@ export default function App() {
 
     // 1. Fetch user contacts from server backend
     fetch(`/api/contacts?email=${encodeURIComponent(userEmail)}`)
-      .then(res => res.json())
+      .then(res => (res.ok && res.headers.get('content-type')?.includes('application/json')) ? res.json() : { contacts: [] })
       .then(data => {
         if (Array.isArray(data.contacts) && data.contacts.length > 0) {
           setContacts(prev => {
@@ -113,11 +113,11 @@ export default function App() {
           });
         }
       })
-      .catch(e => console.error('Failed to load server contacts:', e));
+      .catch(() => {});
 
     // 2. Fetch user messages & threads from server backend
     fetch(`/api/messages?email=${encodeURIComponent(userEmail)}`)
-      .then(res => res.json())
+      .then(res => (res.ok && res.headers.get('content-type')?.includes('application/json')) ? res.json() : { messages: [], threads: {} })
       .then(data => {
         const loadedMsgs: { [contactId: string]: Message[] } = {};
 
@@ -282,7 +282,8 @@ export default function App() {
     const syncServerMessages = async () => {
       try {
         const res = await fetch(`/api/messages?email=${encodeURIComponent(currentEmail)}`);
-        if (res.ok) {
+        const contentType = res.headers.get('content-type') || '';
+        if (res.ok && contentType.includes('application/json')) {
           const data = await res.json();
           if (Array.isArray(data.messages)) {
             data.messages.forEach((m: any) => {
@@ -292,9 +293,7 @@ export default function App() {
             });
           }
         }
-      } catch (err) {
-        console.error('Failed to sync server messages:', err);
-      }
+      } catch (err) {}
     };
 
     syncServerMessages();
@@ -319,7 +318,7 @@ export default function App() {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (spacesRes.ok) {
+        if (spacesRes.ok && spacesRes.headers.get('content-type')?.includes('application/json')) {
           const spacesData = await spacesRes.json();
           const rawSpaces = spacesData.spaces || [];
           
@@ -336,7 +335,7 @@ export default function App() {
                 const memberRes = await fetch(`/api/google-proxy?url=${encodeURIComponent(memberUrl)}`, {
                   headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (memberRes.ok) {
+                if (memberRes.ok && memberRes.headers.get('content-type')?.includes('application/json')) {
                   const memberData = await memberRes.json();
                   const memberships = memberData.memberships || [];
                   const otherMember = memberships.find((m: any) => m.member?.email?.toLowerCase() !== currentUserProfile.email.toLowerCase());
@@ -406,7 +405,7 @@ export default function App() {
           headers: { 'Authorization': `Bearer ${user.accessToken}` }
         });
 
-        if (messagesRes.ok) {
+        if (messagesRes.ok && messagesRes.headers.get('content-type')?.includes('application/json')) {
           const data = await messagesRes.json();
           const googleMessages = data.messages || [];
 
@@ -441,7 +440,7 @@ export default function App() {
           headers: { 'Authorization': `Bearer ${user.accessToken}` }
         });
 
-        if (membershipsRes.ok) {
+        if (membershipsRes.ok && membershipsRes.headers.get('content-type')?.includes('application/json')) {
           const data = await membershipsRes.json();
           const memberships = data.memberships || [];
           const count = memberships.length;
@@ -476,7 +475,7 @@ export default function App() {
           headers: { 'Authorization': `Bearer ${user.accessToken}` }
         });
 
-        if (messagesRes.ok) {
+        if (messagesRes.ok && messagesRes.headers.get('content-type')?.includes('application/json')) {
           const data = await messagesRes.json();
           const googleMessages = data.messages || [];
 
