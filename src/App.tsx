@@ -578,17 +578,28 @@ export default function App() {
 
   // Add custom contact manually
   const handleAddCustomContact = (name: string, email: string) => {
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+    if (cleanEmail) {
+      const existing = contacts.find(c => c.email && c.email.toLowerCase() === cleanEmail);
+      if (existing) {
+        setActiveContactId(existing.id);
+        return;
+      }
+    }
+
+    const firstChar = name.trim().charAt(0).toUpperCase() || 'U';
     const newContact: Contact = {
       id: `custom-${Date.now()}`,
-      name,
-      email: email || undefined,
-      avatar: `https://placehold.co/100x100/00a884/fff?text=${encodeURIComponent(name[0])}`,
+      name: name.trim(),
+      email: cleanEmail || undefined,
+      avatar: `https://placehold.co/100x100/1a73e8/fff?text=${encodeURIComponent(firstChar)}`,
       unreadCount: 0,
       isOnline: true,
       type: 'contact'
     };
 
     setContacts((prev) => [newContact, ...prev]);
+    setActiveContactId(newContact.id);
 
     if (user?.email) {
       fetch('/api/contacts', {

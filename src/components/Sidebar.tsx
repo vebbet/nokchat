@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Contact, UserProfile } from '../types';
-import { Search, MessageSquare, UserPlus, Users, MessageSquareCode, Trash2, Compass, Settings, LogOut, Sparkles, UserCheck } from 'lucide-react';
+import { Search, MessageSquare, UserPlus, Users, MessageSquareCode, Trash2, Compass, Settings, LogOut, Sparkles, UserCheck, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import NokPearLogo from './NokPearLogo';
 
@@ -552,6 +552,45 @@ export default function Sidebar({
                       </span>
                     </motion.div>
                   ))}
+                </div>
+              )}
+
+              {/* Direct Gmail/Email Messaging Trigger */}
+              {searchQuery.trim().length > 0 && (
+                <div className="mt-2 pt-2 border-t border-gray-200">
+                  <div className="px-2 py-1 text-[10px] font-bold text-gray-500 tracking-wider uppercase">
+                    Pochta yoki Ism bo'yicha to'g'ridan-to'g'ri xabar yuborish:
+                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    onClick={() => {
+                      const queryText = searchQuery.trim();
+                      const isEmail = queryText.includes('@');
+                      const email = isEmail ? queryText.toLowerCase() : `${queryText.toLowerCase()}@gmail.com`;
+                      const namePart = isEmail ? queryText.split('@')[0] : queryText;
+                      const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+                      onAddCustomContact(formattedName, email);
+                      setSearchQuery('');
+                    }}
+                    className="flex items-center px-3 py-2.5 bg-emerald-50/90 border border-emerald-200 hover:bg-emerald-100/80 rounded-xl cursor-pointer transition-all duration-150 shadow-2xs my-1 group"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-2xs">
+                      +
+                    </div>
+                    <div className="ml-3 flex-1 min-w-0">
+                      <span className="text-xs font-bold text-emerald-950 truncate block group-hover:text-emerald-700">
+                        "{searchQuery.trim()}" ga xabar yozish
+                      </span>
+                      <span className="text-[10px] text-emerald-700 truncate block">
+                        Yangi shaxsiy chat oynasini darhol ochish
+                      </span>
+                    </div>
+                    <span className="text-[10px] bg-emerald-600 group-hover:bg-emerald-700 text-white font-bold px-2.5 py-1.5 rounded-lg shrink-0 transition shadow-xs flex items-center gap-1">
+                      <Send size={11} />
+                      Yozish
+                    </span>
+                  </motion.div>
                 </div>
               )}
             </div>
