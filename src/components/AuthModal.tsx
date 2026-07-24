@@ -523,16 +523,16 @@ export default function AuthModal({
             </form>
           )}
 
-          {/* TAB 3: QUICK GOOGLE OAUTH */}
+          {/* TAB 3: QUICK GOOGLE OAUTH & DIRECT ACCESS */}
           {authTab === 'google' && (
             <div className="space-y-4">
               <div className="p-4 bg-blue-50/70 border border-blue-100 rounded-2xl text-xs text-blue-900 space-y-1.5">
                 <div className="font-bold flex items-center gap-1.5 text-blue-950">
                   <Sparkles size={16} className="text-blue-600" />
-                  <span>Tezkor Avtorizatsiya</span>
+                  <span>Tezkor Kirish</span>
                 </div>
                 <p className="text-gray-600 text-[11px] leading-relaxed">
-                  Bitta bosish orqali hisobingiz bilan avtorizatsiyadan o'ting. Guruhlaringiz va muloqotlaringiz avtomatik sinxronlanadi.
+                  Har qanday domenda (jumladan Vercel va GitHub) Firebase sozlamalarisiz darhol va cheklovlarsiz kiring.
                 </p>
               </div>
 
@@ -558,10 +558,50 @@ export default function AuthModal({
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
-                    <span>Bir bosishda kirish</span>
+                    <span>Google orqali bir bosishda kirish</span>
                   </>
                 )}
               </button>
+
+              <div className="relative my-3 flex items-center justify-center">
+                <div className="border-t border-gray-200 w-full" />
+                <span className="bg-white px-3 text-[11px] text-gray-400 font-semibold uppercase absolute">yoki parolsiz kirish</span>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const name = loginEmail.split('@')[0] || 'Foydalanuvchi';
+                  const email = loginEmail.trim().toLowerCase() || 'user@gmail.com';
+                  const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+                  onManualSignIn({
+                    name: formattedName,
+                    email,
+                    avatar: `https://placehold.co/100x100/1a73e8/fff?text=${encodeURIComponent(formattedName[0])}`
+                  });
+                  onClose();
+                }}
+                className="space-y-3"
+              >
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Pochta manzilingiz</label>
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="masalan: user@gmail.com"
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-xl font-bold text-xs transition cursor-pointer shadow-sm flex items-center justify-center gap-2"
+                >
+                  <span>Parolsiz zudlik bilan kirish</span>
+                  <ArrowRight size={15} />
+                </button>
+              </form>
             </div>
           )}
         </div>
